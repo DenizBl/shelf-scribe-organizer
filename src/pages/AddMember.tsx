@@ -1,118 +1,104 @@
 
-import { useLibrary } from "@/contexts/LibraryContext";
-import { useNavigate } from "react-router-dom";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const formSchema = z.object({
-  name: z.string().min(1, { message: "Name is required" }),
-  email: z.string().email({ message: "Invalid email address" }),
-  phone: z.string().min(1, { message: "Phone number is required" }),
-});
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useLibrary } from '@/contexts/LibraryContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
 
 const AddMember = () => {
   const { addMember } = useLibrary();
   const navigate = useNavigate();
   
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-    },
-  });
-  
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    addMember(values);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     
-    toast.success("Member added successfully");
-    navigate("/members");
-  }
-  
+    // Validate required fields
+    if (!name || !email) {
+      toast({
+        title: "Missing Information",
+        description: "Name and email are required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Add member with required fields
+    addMember({
+      name,
+      email,
+      phone,
+    });
+    
+    toast({
+      title: "Success",
+      description: "Member was added to the library."
+    });
+    
+    // Navigate to members list
+    navigate('/members');
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Add New Member</h1>
-        <p className="text-muted-foreground">Add a new member to your library</p>
-      </div>
-      
+    <div className="container mx-auto max-w-2xl">
       <Card>
         <CardHeader>
-          <CardTitle>Member Information</CardTitle>
+          <CardTitle className="text-2xl">Add New Member</CardTitle>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter full name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter email address" type="email" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2">
-                      <FormLabel>Phone Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter phone number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name *</Label>
+                <Input 
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Member name"
+                  required
                 />
               </div>
               
-              <div className="flex justify-end gap-4">
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={() => navigate(-1)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" className="bg-library-primary hover:bg-library-primary/90">
-                  Add Member
-                </Button>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input 
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email address"
+                  required
+                />
               </div>
-            </form>
-          </Form>
+              
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input 
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Phone number"
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-4 pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => navigate('/members')}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Add Member</Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

@@ -1,13 +1,8 @@
 
-import Dashboard from "./Dashboard";
-import Layout from "@/components/Layout";
+import { Navigate } from "react-router-dom";
 
 const Index = () => {
-  return (
-    <Layout>
-      <Dashboard />
-    </Layout>
-  );
+  return <Navigate to="/dashboard" replace />;
 };
 
 export default Index;

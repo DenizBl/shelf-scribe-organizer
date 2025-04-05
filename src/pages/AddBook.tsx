@@ -1,209 +1,169 @@
 
-import { useLibrary } from "@/contexts/LibraryContext";
-import { useNavigate } from "react-router-dom";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const formSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
-  author: z.string().min(1, { message: "Author is required" }),
-  isbn: z.string().min(1, { message: "ISBN is required" }),
-  publishYear: z.string().min(1, { message: "Publication year is required" }),
-  category: z.string().min(1, { message: "Category is required" }),
-  coverImage: z.string().optional(),
-  description: z.string().optional(),
-});
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useLibrary } from '@/contexts/LibraryContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
 
 const AddBook = () => {
   const { addBook } = useLibrary();
   const navigate = useNavigate();
   
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      author: "",
-      isbn: "",
-      publishYear: "",
-      category: "",
-      coverImage: "",
-      description: "",
-    },
-  });
-  
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
+  const [isbn, setIsbn] = useState('');
+  const [publishYear, setPublishYear] = useState('');
+  const [category, setCategory] = useState('Fiction');
+  const [coverImage, setCoverImage] = useState('');
+  const [description, setDescription] = useState('');
+
+  const categories = [
+    "Fiction", "Non-fiction", "Mystery", "Science Fiction", 
+    "Fantasy", "Biography", "History", "Self-Help", 
+    "Children's", "Reference", "Business", "Science"
+  ];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    if (!title || !author || !isbn) {
+      toast({
+        title: "Missing Information",
+        description: "Title, author and ISBN are required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Add book with required fields
     addBook({
-      ...values,
-      status: 'available',
+      title,
+      author,
+      isbn,
+      publishYear,
+      category,
+      coverImage: coverImage || '/placeholder.svg',
+      description,
+      status: "available",
     });
     
-    toast.success("Book added successfully");
-    navigate("/books");
-  }
-  
+    toast({
+      title: "Success",
+      description: "Book was added to the library."
+    });
+    
+    // Navigate to books list
+    navigate('/books');
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Add New Book</h1>
-        <p className="text-muted-foreground">Add a new book to your library collection</p>
-      </div>
-      
+    <div className="container mx-auto max-w-3xl">
       <Card>
         <CardHeader>
-          <CardTitle>Book Information</CardTitle>
+          <CardTitle className="text-2xl">Add New Book</CardTitle>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter book title" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="author"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Author</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter author name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="isbn"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ISBN</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter ISBN number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="publishYear"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Publication Year</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter publication year" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Fiction">Fiction</SelectItem>
-                          <SelectItem value="Non-fiction">Non-fiction</SelectItem>
-                          <SelectItem value="Science Fiction">Science Fiction</SelectItem>
-                          <SelectItem value="Fantasy">Fantasy</SelectItem>
-                          <SelectItem value="Mystery">Mystery</SelectItem>
-                          <SelectItem value="Biography">Biography</SelectItem>
-                          <SelectItem value="History">History</SelectItem>
-                          <SelectItem value="Self-help">Self-help</SelectItem>
-                          <SelectItem value="Reference">Reference</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="coverImage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cover Image URL</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter cover image URL (optional)" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Title *</Label>
+                <Input 
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Book title"
+                  required
                 />
               </div>
               
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Enter book description (optional)" 
-                        className="min-h-[100px]"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="author">Author *</Label>
+                <Input 
+                  id="author"
+                  value={author}
+                  onChange={(e) => setAuthor(e.target.value)}
+                  placeholder="Book author"
+                  required
+                />
+              </div>
               
-              <div className="flex justify-end gap-4">
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={() => navigate(-1)}
+              <div className="space-y-2">
+                <Label htmlFor="isbn">ISBN *</Label>
+                <Input 
+                  id="isbn"
+                  value={isbn}
+                  onChange={(e) => setIsbn(e.target.value)}
+                  placeholder="ISBN number"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="publishYear">Publish Year</Label>
+                <Input 
+                  id="publishYear"
+                  value={publishYear}
+                  onChange={(e) => setPublishYear(e.target.value)}
+                  placeholder="Year of publication"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select 
+                  value={category} 
+                  onValueChange={setCategory}
                 >
-                  Cancel
-                </Button>
-                <Button type="submit" className="bg-library-primary hover:bg-library-primary/90">
-                  Add Book
-                </Button>
+                  <SelectTrigger id="category">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </form>
-          </Form>
+              
+              <div className="space-y-2">
+                <Label htmlFor="coverImage">Cover Image URL</Label>
+                <Input 
+                  id="coverImage"
+                  value={coverImage}
+                  onChange={(e) => setCoverImage(e.target.value)}
+                  placeholder="URL to book cover image"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea 
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Book description"
+                className="min-h-[100px]"
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => navigate('/books')}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Add Book</Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>
