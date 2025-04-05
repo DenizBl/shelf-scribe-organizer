@@ -4,11 +4,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useLibrary } from '@/contexts/LibraryContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Lock, Mail, User, BookOpen, Phone } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -42,6 +41,14 @@ const Register = () => {
       confirmPassword: "",
       phone: "",
       role: "member"
+    },
+    values: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      phone: "",
+      role: role
     }
   });
 
@@ -70,6 +77,7 @@ const Register = () => {
         <CardContent>
           <Tabs 
             defaultValue="member" 
+            value={role}
             onValueChange={(value) => setRole(value as "member" | "admin")}
             className="w-full"
           >

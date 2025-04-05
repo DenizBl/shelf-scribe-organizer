@@ -4,11 +4,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useLibrary } from '@/contexts/LibraryContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Lock, Mail, User, BookOpen } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Lock, Mail, BookOpen } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -33,6 +32,11 @@ const Login = () => {
       email: "",
       password: "",
       role: "member"
+    },
+    values: {
+      email: "",
+      password: "",
+      role: role
     }
   });
 
@@ -40,7 +44,7 @@ const Login = () => {
     try {
       login(data.email, data.password, data.role);
       toast.success(`Welcome back! You're logged in as ${data.role}`);
-      navigate('/');
+      navigate('/dashboard');
     } catch (error) {
       toast.error("Invalid credentials. Please try again.");
     }
@@ -61,6 +65,7 @@ const Login = () => {
         <CardContent>
           <Tabs 
             defaultValue="member" 
+            value={role}
             onValueChange={(value) => setRole(value as "member" | "admin")}
             className="w-full"
           >

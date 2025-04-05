@@ -1,5 +1,5 @@
 
-import { Book, Users, BookOpen, BookPlus, Settings, LogOut, LogIn, UserPlus } from "lucide-react";
+import { Book, Users, BookOpen, BookPlus, Settings, LogOut, LogIn, UserPlus, BookCopy, User } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -8,14 +8,22 @@ import {
   SidebarTrigger,
   SidebarHeader,
   SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { useLibrary } from "@/contexts/LibraryContext";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
+import { Badge } from "./ui/badge";
 
 export function Sidebar() {
   const { isAuthenticated, logout, currentUser, canEditBooks } = useLibrary();
   const navigate = useNavigate();
+  const isAdmin = currentUser?.role === 'admin';
 
   const handleLogout = () => {
     logout();
@@ -23,26 +31,19 @@ export function Sidebar() {
     navigate("/login");
   };
 
-  // Define navigation items based on authentication status and user role
-  const getNavItems = () => {
-    const baseItems = [
-      { path: "/dashboard", name: "Dashboard", icon: <BookOpen className="h-5 w-5" /> },
-      { path: "/books", name: "Books", icon: <Book className="h-5 w-5" /> },
-    ];
+  // Common items for all authenticated users
+  const commonItems = [
+    { path: "/dashboard", name: "Dashboard", icon: <BookOpen className="h-5 w-5" /> },
+    { path: "/books", name: "Books", icon: <Book className="h-5 w-5" /> },
+    { path: "/members", name: "Members", icon: <Users className="h-5 w-5" /> },
+    { path: "/settings", name: "Settings", icon: <Settings className="h-5 w-5" /> },
+  ];
 
-    // Items for authenticated users
-    if (isAuthenticated) {
-      baseItems.push({ path: "/members", name: "Members", icon: <Users className="h-5 w-5" /> });
-      baseItems.push({ path: "/settings", name: "Settings", icon: <Settings className="h-5 w-5" /> });
-      
-      // Admin-only items
-      if (canEditBooks()) {
-        baseItems.push({ path: "/add-book", name: "Add Book", icon: <BookPlus className="h-5 w-5" /> });
-      }
-    }
-    
-    return baseItems;
-  };
+  // Admin-specific items
+  const adminItems = [
+    { path: "/add-book", name: "Add Book", icon: <BookPlus className="h-5 w-5" /> },
+    { path: "/add-member", name: "Add Member", icon: <UserPlus className="h-5 w-5" /> },
+  ];
 
   return (
     <ShadcnSidebar className="border-r border-library-light">
@@ -54,54 +55,115 @@ export function Sidebar() {
         <SidebarTrigger />
       </SidebarHeader>
       <SidebarContent>
-        <nav className="grid items-start px-2 py-4">
-          {getNavItems().map((item, index) => (
-            <NavLink
-              key={index}
-              to={item.path}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
-                  "hover:bg-library-primary hover:text-white",
-                  isActive
-                    ? "bg-library-primary text-white"
-                    : "text-library-text"
-                )
-              }
-            >
-              {item.icon}
-              <span className="text-sm font-medium">{item.name}</span>
-            </NavLink>
-          ))}
-        </nav>
-      </SidebarContent>
-      <SidebarFooter className="px-2 py-2 border-t border-library-light">
         {isAuthenticated ? (
-          <div className="space-y-4 px-2">
-            <div className="flex items-center gap-3 text-sm font-medium text-library-text">
-              <span className="truncate">{currentUser?.name}</span>
-              <span className="text-xs bg-library-primary text-white px-2 py-0.5 rounded">
-                {currentUser?.role}
-              </span>
+          <>
+            {/* User profile summary */}
+            <div className="px-4 py-2 mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-10 h-10 rounded-full bg-library-primary/20 flex items-center justify-center">
+                  <User className="h-6 w-6 text-library-primary" />
+                </div>
+                <div>
+                  <p className="font-medium truncate">{currentUser?.name}</p>
+                  <Badge variant={isAdmin ? "default" : "outline"} className={isAdmin ? "bg-library-primary" : ""}>
+                    {currentUser?.role}
+                  </Badge>
+                </div>
+              </div>
             </div>
-            <Button variant="outline" className="w-full justify-start" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </Button>
-          </div>
+
+            {/* Common navigation for all users */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {commonItems.map((item) => (
+                    <SidebarMenuItem key={item.path}>
+                      <NavLink
+                        to={item.path}
+                        className={({ isActive }) =>
+                          cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+                            "hover:bg-library-primary hover:text-white",
+                            isActive
+                              ? "bg-library-primary text-white"
+                              : "text-library-text"
+                          )
+                        }
+                      >
+                        {item.icon}
+                        <span className="text-sm font-medium">{item.name}</span>
+                      </NavLink>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* Admin-only section */}
+            {isAdmin && (
+              <SidebarGroup>
+                <SidebarGroupLabel>Administration</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {adminItems.map((item) => (
+                      <SidebarMenuItem key={item.path}>
+                        <NavLink
+                          to={item.path}
+                          className={({ isActive }) =>
+                            cn(
+                              "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+                              "hover:bg-library-primary hover:text-white",
+                              isActive
+                                ? "bg-library-primary text-white"
+                                : "text-library-text"
+                            )
+                          }
+                        >
+                          {item.icon}
+                          <span className="text-sm font-medium">{item.name}</span>
+                        </NavLink>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
+          </>
         ) : (
-          <div className="flex flex-col gap-2">
-            <Button variant="default" className="w-full justify-start" onClick={() => navigate('/login')}>
-              <LogIn className="mr-2 h-4 w-4" />
-              Login
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/register')}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Register
-            </Button>
-          </div>
+          <SidebarGroup>
+            <SidebarGroupLabel>Public</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/login" className="flex items-center gap-3">
+                      <LogIn className="h-5 w-5" />
+                      <span>Login</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/register" className="flex items-center gap-3">
+                      <UserPlus className="h-5 w-5" />
+                      <span>Register</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         )}
-      </SidebarFooter>
+      </SidebarContent>
+      {isAuthenticated && (
+        <SidebarFooter className="px-4 py-4 border-t border-library-light">
+          <Button variant="outline" className="w-full justify-start" onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </SidebarFooter>
+      )}
     </ShadcnSidebar>
   );
 }

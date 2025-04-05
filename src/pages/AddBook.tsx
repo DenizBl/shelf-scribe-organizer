@@ -20,28 +20,27 @@ const AddBook = () => {
   const [publishYear, setPublishYear] = useState('');
   const [category, setCategory] = useState('Fiction');
   const [coverImage, setCoverImage] = useState('');
-  const [description, setDescription] = useState('');
   const [intendedFor, setIntendedFor] = useState('');
 
   const categories = [
     "Fiction", "Non-fiction", "Mystery", "Science Fiction", 
-    "Fantasy", "Biography", "History", "Self-Help", 
-    "Children's", "Reference", "Business", "Science"
+    "Fantasy", "Biography", "History", "Poetry", 
+    "Self-help", "Reference", "Children's", "Young Adult"
   ];
-
+  
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 125 }, (_, i) => (currentYear - i).toString());
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
     if (!title || !author || !isbn) {
-      toast({
-        title: "Missing Information",
+      toast("Missing Information", {
         description: "Title, author and ISBN are required fields."
       });
       return;
     }
     
-    // Add book with required fields
     addBook({
       title,
       author,
@@ -53,71 +52,80 @@ const AddBook = () => {
       intendedFor: intendedFor || undefined,
     });
     
-    toast({
-      title: "Success",
-      description: "Book was added to the library."
+    toast("Book Added", {
+      description: "The book has been added to your library."
     });
     
-    // Navigate to books list
     navigate('/books');
   };
-
+  
   return (
-    <div className="container mx-auto max-w-3xl">
+    <div>
+      <h1 className="text-3xl font-bold tracking-tight mb-6">Add New Book</h1>
+      
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Add New Book</CardTitle>
+          <CardTitle>Book Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
-                <Input 
+                <Label htmlFor="title">Title</Label>
+                <Input
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Book title"
+                  placeholder="Enter book title"
                   required
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="author">Author *</Label>
-                <Input 
+                <Label htmlFor="author">Author</Label>
+                <Input
                   id="author"
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
-                  placeholder="Book author"
+                  placeholder="Enter author name"
                   required
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="isbn">ISBN *</Label>
-                <Input 
+                <Label htmlFor="isbn">ISBN</Label>
+                <Input
                   id="isbn"
                   value={isbn}
                   onChange={(e) => setIsbn(e.target.value)}
-                  placeholder="ISBN number"
+                  placeholder="e.g., 978-3-16-148410-0"
                   required
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="publishYear">Publish Year</Label>
-                <Input 
-                  id="publishYear"
+                <Label htmlFor="year">Publish Year</Label>
+                <Select
                   value={publishYear}
-                  onChange={(e) => setPublishYear(e.target.value)}
-                  placeholder="Year of publication"
-                />
+                  onValueChange={setPublishYear}
+                >
+                  <SelectTrigger id="year">
+                    <SelectValue placeholder="Select year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
-                <Select 
-                  value={category} 
+                <Select
+                  value={category}
                   onValueChange={setCategory}
                 >
                   <SelectTrigger id="category">
@@ -125,7 +133,9 @@ const AddBook = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -133,26 +143,15 @@ const AddBook = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="coverImage">Cover Image URL</Label>
-                <Input 
+                <Input
                   id="coverImage"
                   value={coverImage}
                   onChange={(e) => setCoverImage(e.target.value)}
-                  placeholder="URL to book cover image"
+                  placeholder="https://example.com/book-cover.jpg"
                 />
               </div>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea 
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Book description"
-                className="min-h-[100px]"
-              />
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="intendedFor">Intended Audience</Label>
               <Textarea 
@@ -167,7 +166,7 @@ const AddBook = () => {
             <div className="flex justify-end space-x-4">
               <Button 
                 type="button" 
-                variant="outline" 
+                variant="outline"
                 onClick={() => navigate('/books')}
               >
                 Cancel
