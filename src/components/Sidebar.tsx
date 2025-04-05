@@ -26,7 +26,7 @@ export function Sidebar() {
   // Define navigation items based on authentication status and user role
   const getNavItems = () => {
     const baseItems = [
-      { path: "/", name: "Dashboard", icon: <BookOpen className="h-5 w-5" /> },
+      { path: "/dashboard", name: "Dashboard", icon: <BookOpen className="h-5 w-5" /> },
       { path: "/books", name: "Books", icon: <Book className="h-5 w-5" /> },
     ];
 

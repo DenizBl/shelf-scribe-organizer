@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 const AddBook = () => {
   const { addBook } = useLibrary();
@@ -21,6 +21,7 @@ const AddBook = () => {
   const [category, setCategory] = useState('Fiction');
   const [coverImage, setCoverImage] = useState('');
   const [description, setDescription] = useState('');
+  const [intendedFor, setIntendedFor] = useState('');
 
   const categories = [
     "Fiction", "Non-fiction", "Mystery", "Science Fiction", 
@@ -35,8 +36,7 @@ const AddBook = () => {
     if (!title || !author || !isbn) {
       toast({
         title: "Missing Information",
-        description: "Title, author and ISBN are required fields.",
-        variant: "destructive"
+        description: "Title, author and ISBN are required fields."
       });
       return;
     }
@@ -49,8 +49,8 @@ const AddBook = () => {
       publishYear,
       category,
       coverImage: coverImage || '/placeholder.svg',
-      description,
       status: "available",
+      intendedFor: intendedFor || undefined,
     });
     
     toast({
@@ -150,6 +150,17 @@ const AddBook = () => {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Book description"
                 className="min-h-[100px]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="intendedFor">Intended Audience</Label>
+              <Textarea 
+                id="intendedFor"
+                value={intendedFor}
+                onChange={(e) => setIntendedFor(e.target.value)}
+                placeholder="Who is this book intended for?"
+                className="min-h-[80px]"
               />
             </div>
             

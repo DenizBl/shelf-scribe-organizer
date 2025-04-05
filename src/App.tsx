@@ -32,12 +32,28 @@ const App = () => (
             {/* Public routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/" element={<Layout><Dashboard /></Layout>} />
-
+            
             {/* Protected routes */}
-            <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-            <Route path="/books" element={<Layout><Books /></Layout>} />
-            <Route path="/books/:id" element={<Layout><BookDetails /></Layout>} />
+            <Route path="/" element={
+              <AuthGuard>
+                <Layout><Dashboard /></Layout>
+              </AuthGuard>
+            } />
+            <Route path="/dashboard" element={
+              <AuthGuard>
+                <Layout><Dashboard /></Layout>
+              </AuthGuard>
+            } />
+            <Route path="/books" element={
+              <AuthGuard>
+                <Layout><Books /></Layout>
+              </AuthGuard>
+            } />
+            <Route path="/books/:id" element={
+              <AuthGuard>
+                <Layout><BookDetails /></Layout>
+              </AuthGuard>
+            } />
             
             {/* Admin only routes */}
             <Route path="/add-book" element={

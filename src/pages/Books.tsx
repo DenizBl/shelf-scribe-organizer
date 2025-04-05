@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { BookPlus } from "lucide-react";
 
 const Books = () => {
-  const { books, returnBook } = useLibrary();
+  const { books, returnBook, canEditBooks } = useLibrary();
   const navigate = useNavigate();
   
   return (
@@ -17,13 +17,15 @@ const Books = () => {
           <p className="text-muted-foreground">Manage your library collection</p>
         </div>
         
-        <Button 
-          onClick={() => navigate("/add-book")}
-          className="bg-library-primary hover:bg-library-primary/90"
-        >
-          <BookPlus className="mr-2 h-4 w-4" />
-          Add New Book
-        </Button>
+        {canEditBooks() && (
+          <Button 
+            onClick={() => navigate("/add-book")}
+            className="bg-library-primary hover:bg-library-primary/90"
+          >
+            <BookPlus className="mr-2 h-4 w-4" />
+            Add New Book
+          </Button>
+        )}
       </div>
       
       <BookList 
