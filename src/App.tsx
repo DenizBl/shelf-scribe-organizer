@@ -15,6 +15,9 @@ import BookDetails from "./pages/BookDetails";
 import MemberDetails from "./pages/MemberDetails";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import AuthGuard from "./components/AuthGuard";
 
 const queryClient = new QueryClient();
 
@@ -26,15 +29,48 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/" element={<Layout><Dashboard /></Layout>} />
+
+            {/* Protected routes */}
             <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
             <Route path="/books" element={<Layout><Books /></Layout>} />
             <Route path="/books/:id" element={<Layout><BookDetails /></Layout>} />
-            <Route path="/add-book" element={<Layout><AddBook /></Layout>} />
-            <Route path="/members" element={<Layout><Members /></Layout>} />
-            <Route path="/members/:id" element={<Layout><MemberDetails /></Layout>} />
-            <Route path="/add-member" element={<Layout><AddMember /></Layout>} />
-            <Route path="/settings" element={<Layout><Settings /></Layout>} />
+            
+            {/* Admin only routes */}
+            <Route path="/add-book" element={
+              <AuthGuard requireAdmin={true}>
+                <Layout><AddBook /></Layout>
+              </AuthGuard>
+            } />
+            
+            {/* Member management */}
+            <Route path="/members" element={
+              <AuthGuard>
+                <Layout><Members /></Layout>
+              </AuthGuard>
+            } />
+            <Route path="/members/:id" element={
+              <AuthGuard>
+                <Layout><MemberDetails /></Layout>
+              </AuthGuard>
+            } />
+            <Route path="/add-member" element={
+              <AuthGuard requireAdmin={true}>
+                <Layout><AddMember /></Layout>
+              </AuthGuard>
+            } />
+            
+            {/* Settings */}
+            <Route path="/settings" element={
+              <AuthGuard>
+                <Layout><Settings /></Layout>
+              </AuthGuard>
+            } />
+            
+            {/* 404 page */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
